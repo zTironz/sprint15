@@ -1,5 +1,9 @@
 # sprint15
 
+публичный ip: 84.201.162.249
+front-end сайт: https://ztironz.tk
+backend: https://api.ztironz.tk
+
 запрос на GET /users возвращает всех пользователей из базы;
 запрос GET /users/:userId возвращает конкретного пользователя;
 запрос POST /signup  создаёт пользователя;
