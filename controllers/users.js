@@ -1,29 +1,32 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
+const BadRequest = require('../errors/bad-request');
+const NotFoundError = require('../errors/not-found-err');
+const UniqueError = require('../errors/unique-error');
 
 const { NODE_ENV, JWT_SECRET } = process.env;
 
-module.exports.getUsers = (req, res) => {
+module.exports.getUsers = (req, res, next) => {
   User
     .find({})
     .then((users) => res.send({ users }))
-    .catch((err) => res.status(500).send({ message: err.massage }));
+    .catch(next);
 };
 
-module.exports.getUser = (req, res) => {
+module.exports.getUser = (req, res, next) => {
   User
     .findById(req.params.userId)
     .then((user) => {
       if (!user) {
-        res.status(404).send({ message: 'Такого пользователя нет' });
+        throw new NotFoundError({ message: 'Такого пользователя нет' });
       } else {
         res.send({ user });
       }
     })
-    .catch(() => res.status(400).send({ message: 'Нет пользователя с таким id' }));
+    .catch(next);
 };
-module.exports.createUser = (req, res) => {
+module.exports.createUser = (req, res, next) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
@@ -50,11 +53,12 @@ module.exports.createUser = (req, res) => {
     }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(400).send({ message: err.message });
+        throw new BadRequest({ message: err.message });
       } else {
-        res.status(409).send({ message: 'Данный Email уже используется' });
+        throw new UniqueError({ message: 'Данный Email уже используется' });
       }
-    });
+    })
+    .catch(next);
 };
 
 module.exports.login = (req, res) => {

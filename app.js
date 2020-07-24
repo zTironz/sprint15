@@ -6,6 +6,7 @@ const usersRoute = require('./routes/users');
 const { login, createUser } = require('./controllers/users');
 require('dotenv').config();
 const { auth } = require('./middlewares/auth');
+const NotFoundError = require('./errors/not-found-err');
 
 const { PORT = 3000 } = process.env;
 
@@ -24,7 +25,16 @@ app.post('/signup', createUser);
 app.post('/signin', login);
 app.use('/cards', auth, cardsRoute);
 app.use('/users', auth, usersRoute);
-app.all('*', (req, res) => {
-  res.status(404).send({ message: 'Запрашиваемый ресурс не найден' });
+app.all('*', (req, res, next) => {
+  next(new NotFoundError('Запрашиваемый ресурс не найден'));
 });
+
+// eslint-disable-next-line no-unused-vars
+app.use((err, req, res, next) => {
+  const { statusCode = 500, message } = err;
+  res
+    .status(statusCode)
+    .send({ message: statusCode === 500 ? 'На сервере произошла ошибка' : message });
+});
+
 app.listen(PORT);
