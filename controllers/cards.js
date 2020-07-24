@@ -33,20 +33,15 @@ const createCard = (req, res, next) => {
 
 const deleteCard = (req, res, next) => {
   Card.findById(req.params.cardId)
-    // eslint-disable-next-line consistent-return
     .then((card) => {
       if (!card) {
-        throw new NotFoundError({ message: 'Нет карточки' });
-      } if (card.owner._id.toString() === req.user._id) {
-        return card.remove(req.params.cardId).then(() => res.status(200).send({ message: 'Карточка удалена' }));
-      } throw new Unauthorized({ message: 'Недостаточно прав' });
-    })
-    // eslint-disable-next-line consistent-return
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        throw new BadRequest({ message: 'Некорректный id' });
+        throw new NotFoundError('Нет карточки');
       }
-      res.status(500).send({ message: err.message });
+      if (card.owner.toString() !== req.user._id) {
+        throw new Unauthorized('Недостаточно прав');
+      }
+      res.send({ data: card });
+      card.remove();
     })
     .catch(next);
 };

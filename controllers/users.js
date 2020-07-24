@@ -19,7 +19,7 @@ module.exports.getUser = (req, res, next) => {
     .findById(req.params.userId)
     .then((user) => {
       if (!user) {
-        throw new NotFoundError({ message: 'Такого пользователя нет' });
+        throw new NotFoundError('Такого пользователя нет');
       } else {
         res.send({ user });
       }
