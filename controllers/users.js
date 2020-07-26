@@ -1,9 +1,9 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-const BadRequest = require('../errors/bad-request');
 const NotFoundError = require('../errors/not-found-err');
 const UniqueError = require('../errors/unique-error');
+const BadRequest = require('../errors/bad-request');
 
 const { NODE_ENV, JWT_SECRET } = process.env;
 
@@ -26,42 +26,34 @@ module.exports.getUser = (req, res, next) => {
     })
     .catch(next);
 };
+// eslint-disable-next-line consistent-return
 module.exports.createUser = (req, res, next) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
   if (!password) {
-    return res.status(400).send({ message: 'Пароль не задан' });
+    throw new BadRequest('Пароль не задан');
   }
   if (password.length < 8) {
-    return res.status(400).send({ message: 'Пароль должен быть не менее 8 символов' });
-  } return bcrypt.hash(password, 10)
+    throw new BadRequest('Пароль должен быть не менее 8 символов');
+  }
+  bcrypt.hash(req.body.password, 10)
     .then((hash) => User.create({
-      email,
-      password: hash,
-      name,
-      about,
-      avatar,
+      name, about, avatar, email, password: hash,
     }))
     .then((user) => res.send({
-      data: {
-        name: user.name,
-        about: user.about,
-        avatar: user.avatar,
-        email: user.email,
-      },
+      name: user.name, about: user.about, avatar: user.avatar, email: user.email,
     }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        throw new BadRequest({ message: err.message });
+        next(new UniqueError(`Данные некорректны: ${err.message}`));
       } else {
-        throw new UniqueError({ message: 'Данный Email уже используется' });
+        next(err);
       }
-    })
-    .catch(next);
+    });
 };
 
-module.exports.login = (req, res) => {
+module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
   if (password) {
     return User
@@ -70,9 +62,7 @@ module.exports.login = (req, res) => {
         const token = jwt.sign({ _id: userObj._id }, NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret', { expiresIn: '7d' });
         res.send({ token });
       })
-      .catch((err) => {
-        res.status(401).send({ message: err.message });
-      });
+      .catch(next);
   }
-  return res.status(400).send({ message: 'Необходимо ввести пароль' });
+  throw new BadRequest('Необходимо ввести пароль');
 };

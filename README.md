@@ -1,6 +1,6 @@
 # sprint15
 
-публичный ip: 84.201.162.249 <br/>
+публичный ip: http://84.201.162.249 <br/>
 front-end сайт: https://ztironz.tk <br/>
 backend: https://api.ztironz.tk <br/>
 <br/> 
