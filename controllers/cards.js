@@ -6,14 +6,7 @@ const Unauthorized = require('../errors/unauthorized');
 const getCards = (req, res, next) => {
   Card.find({})
     .then((cards) => res.send({ cards }))
-    // eslint-disable-next-line consistent-return
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        throw new BadRequest({ message: 'Некорректный id' });
-      }
-      res.status(500).send({ message: err.message });
-    })
-    .catch(next);
+    .catch((err) => next(err));
 };
 
 const createCard = (req, res, next) => {
@@ -24,9 +17,8 @@ const createCard = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         throw new BadRequest({ message: err.message });
-      } else {
-        res.status(500).send({ message: err.message });
       }
+      return err;
     })
     .catch(next);
 };
