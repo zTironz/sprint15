@@ -26,16 +26,17 @@ module.exports.getUser = (req, res, next) => {
     })
     .catch(next);
 };
-// eslint-disable-next-line consistent-return
+
 module.exports.createUser = (req, res, next) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
+  const regExp = /(?=^.{8,}$)(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?!.*\s).*/;
   if (!password) {
     throw new BadRequest('Пароль не задан');
   }
-  if (password.length < 8) {
-    throw new BadRequest('Пароль должен быть не менее 8 символов');
+  if (!regExp.test(password)) {
+    throw new BadRequest('Пароль должен быть не менее 8 символов и содержать цыфры и латинские буквы');
   }
   bcrypt.hash(req.body.password, 10)
     .then((hash) => User.create({
