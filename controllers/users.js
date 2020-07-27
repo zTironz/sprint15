@@ -36,7 +36,7 @@ module.exports.createUser = (req, res, next) => {
     throw new BadRequest('Пароль не задан');
   }
   if (!regExp.test(password)) {
-    throw new BadRequest('Пароль должен быть не менее 8 символов и содержать цыфры и латинские буквы');
+    throw new BadRequest('Пароль должен быть не менее 8 символов и содержать цифры и латинские буквы');
   }
   bcrypt.hash(req.body.password, 10)
     .then((hash) => User.create({
