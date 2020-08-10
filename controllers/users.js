@@ -67,5 +67,3 @@ module.exports.login = (req, res, next) => {
   }
   throw new BadRequest('Необходимо ввести пароль');
 };
-
-console.log('hello');
