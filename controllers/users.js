@@ -49,7 +49,7 @@ module.exports.createUser = (req, res, next) => {
       if (err.name === 'ValidationError') {
         next(new UniqueError(`Данные некорректны: ${err.message}`));
       } else {
-        next(err);
+        next(new UniqueError({ message: 'Данный Email уже используется' }));
       }
     });
 };
